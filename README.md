@@ -20,7 +20,7 @@ and finally generate the api definition.
 
 ```
 git clone https://github.com/pognibene/serverlessjavadoc.git
-cd serverlessjavadoc
+cd serverlessjavadoc/tool
 mvn clean package
 ```
 
@@ -42,7 +42,7 @@ The tool will then go through several phases:
 
 1) recursively scan *all* projects under the input folder. This means that the tool can generate a single open api document for multiple projects.
 With the serverless framework, you typically have one project and one serverless.yaml file per 'API'. Each API in turn contains multiple endpoints.
-2) scan the global claspath for all your projects. Currently this is done by finding all maven pom.xml files and finding the associated classpath.
+2) scan the global classpath for all your projects. Currently this is done by finding all maven pom.xml files and finding the associated classpath.
 This phase can be a bit slow, depending on the complexity of your setup.
 Please note that gradle based builds are not yet supported (but this will most likely be added soon).
 3) load and parse the source files to extract lambda handlers javadoc.
@@ -53,33 +53,102 @@ Please note that gradle based builds are not yet supported (but this will most l
 This file can then imported in a variety of tools like swagger UI for visualisation.
 
 ## Examples
-You can find a working example in the folder examples.
+You can find a working example in the folder examples. (TODO)
 
 
-## Supported functionnalities
+## Supported functionality
 Currently, the tool assumes that all your serverless java lambdas are built using maven.
 Gradle support may come in the future, and potentially support for arbitrary build systems
 if there's demand for it.
-The tool honors the following specific Jackson annotations:
-```
-@JsonClassDescription("A class annotation")
-```
-To document your model classes, that is, classes used in the input and output messages of your REST/Json APIs.
-```
-@JsonPropertyDescription("A property annotation")
-```
-To document your model classes attributes.
-
-The tool also collects Javadoc on your Java handler classes only, and correlate their content
-with information extracted from the serverless.yml files.
 
 ## How to document and annotate your handlers and models
+### Documenting your models
+Models or Views are Java classes that are going to be exchanged with consumers
+of your APIs : they are the input and output of your lambdas.
+You can document these classes at 2 levels:
+* the class level
+* the field level
+
+#### Class level
+At the class level, you can insert an annotation with documentation:
+```
+@JsonClassDescription("A user in the system.")
+public class User {
+}
+```
+#### Field level
+At the field level within a class, you can also insert an annotation:
+```
+@JsonPropertyDescription("The login for the User. This is the email address.")
+private String login;
+```
+### Documenting your handlers
+Your handler classes implement the Java logic.
+Their signature is:
+```
+public class YourHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
+    @Override
+    public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
+        return new ApiGatewayResponse();
+    }
+}
+```
+Because there no existing jax-rs existing anotations for this kind of lambda functions,
+you have to document the handler class with Javadoc style comment:
+```
+/**
+ * Create a new User in the system.
+ *
+ * @ServerlessEndpoint
+ * @ServerlessQueryParam param1 one query parameter
+ * @ServerlessQueryParam param2 Another query parameter
+ * @ServerlessPathParam param3 one path parameter
+ * @ServerlessPathParam param4 Another path parameter
+ * @ServerlessInput com.agileandmore.model.User The User to create.
+ * @ServerlessOutput 201 com.agileandmore.model.User The created User, with
+ * updated information.
+ * @ServerlessOutput 409 void An error if the User already exists.
+ */
+public class CreateUserHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
+    @Override
+    public ApiGatewayResponse handleRequest(Map<String, Object> input, Context context) {
+        return null;
+    }
+}
+```
+#### Handler documentation
+The first line of text after the beginning of the Javadoc (/**) until the first tag (starting with @)
+will become the documentation for your handler. Empty lines are ignored.
+#### @ServerlessEndpoint tag
+This tag is mandatory for the class to be recognized as an API handler class and must be on a single line.
+#### @ServerlessQueryParam tag
+if your endpoint takes query parameters, you can document them using this tag.
+First the tag, then one space, then the parameter name (with no spaces in it), then the text to document the parameter.
+To document multiple query parameters, just use the tag multiple times.
+#### @ServerlessPathParam tag
+if your endpoint takes path parameters, you can document them using this tag.
+First the tag, then one space, then the parameter name (with no spaces in it), then the text to document the parameter.
+To document multiple path parameters, just use the tag multiple times. Note : the tag name must match
+the parameter name in the serverless.yml file.
+#### @ServerlessInput tag
+The tag, then the fully scoped name of the input class, then the documentation text.
+Note : the input class is *not* Map<String, Object>. Rather, it is the type you are going to extract
+from the body part of the incoming message, as wrapped by API Gateway before calling Lambda. Basically,
+the type actually used by the consumer.
+#### @ServerlessOutput tag
+The tag, then the http code, then the fully scoped name of the output class, then the documentation text.
+Note : the output class is *not* ApiGatewayResponse. Rather, it is the type you are going to wrap as
+the body of the ApiGatewayResponse, fo example User. You can have multiple output tags, each with their
+own http code, output class, and documentation.
+If if have a response with an http code but no output, you can use the special type **void** for
+the output message.
 
 ## Known limitations
 
 * The java bean validation annotations are not yet handled (JSR 380), to get better schemas. Support will probably be added in the future.
 * Gradle is not yet supported as a build system. The consequence is we can't build properly the java classpath
 for Gradle based project. Support may be added in the future.
+* the headers and security parts are not managed yet. This should come soon.
 * The documentation for Handler/Lambda functions is currently using Javadoc. While this is the standard way
  to do in Java, it means we have to combine annotations and Javadoc to get a complete documentation.
  This may change in the future, with annotations used for handlers as well. (besides, making a maven plugin
@@ -95,3 +164,4 @@ compiled class and annotation analysis for everything, including Handler documen
 meaning that we can't produce a single open api document. Or we would have to merge
 several documents in a post-processing phase.
 * no gradle plugin yet. More or less for the same reasons than maven.
+* path and query parameters only have the simple type string, complex schemas are not supported yet.
