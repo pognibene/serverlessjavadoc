@@ -1,0 +1,23 @@
+import React, { Component } from 'react';
+import SwaggerUI from "swagger-ui";
+import 'swagger-ui/dist/swagger-ui.css'
+
+class App extends Component {
+  componentDidMount() {
+    SwaggerUI({
+      dom_id: "#ui",
+      url: "https://static.dev.insurance.buk0.com/dev-doc-api/schema.json"
+//http://static.dev.insurance.buk0.com.s3-website-ap-southeast-1.amazonaws.com
+    })
+  }
+  render() {
+    return (
+      <div className="App">
+        
+        <div id="ui" />
+      </div>
+    );
+  }
+}
+
+export default App;

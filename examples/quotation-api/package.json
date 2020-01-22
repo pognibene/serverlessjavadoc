@@ -1,0 +1,17 @@
+{
+  "name": "payment-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "serverless-domain-manager": "^3.3.0",
+    "serverless-pseudo-parameters": "^2.5.0",
+    "serverless-step-functions": "^2.17.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

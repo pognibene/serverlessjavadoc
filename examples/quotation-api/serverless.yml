@@ -1,0 +1,32 @@
+service: quotation-api
+
+custom:
+  deploymentUrls:
+    prod: https://my-prod-url-quotation.com
+    dev: https://my-dev-url-quotation.com
+    preprod: https://my-preprod-quotation-url.com
+
+provider:
+  name: aws
+  runtime: java8
+  stage: ${opt:stage, 'dev'}
+  region: ap-southeast-1
+ 
+package:
+  artifact: target/quotation-api-1.0-SNAPSHOT.jar
+
+functions:
+  createUserQuotationHandler:
+    handler: com.agileandmore.examples.handler.CreateQuotationHandler
+    events:
+      - http:
+          path: api/v1/users/{id}/quotations
+          method: post
+          cors: true
+  getUserQuotationsHandler:
+    handler: com.agileandmore.examples.handler.GetUserQuotationsHandler
+    events:
+      - http:
+          path: api/v1/users/{id}/quotations
+          method: get
+          cors: true
