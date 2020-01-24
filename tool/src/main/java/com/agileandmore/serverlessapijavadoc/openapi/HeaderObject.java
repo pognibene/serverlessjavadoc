@@ -1,7 +1,7 @@
 /*
     Copyright 2020 Pascal Ognibene (pognibene@gmail.com)
 
-    This file is part of The serverless api javadoc api tool (Aka SAJ).
+    This file is part of The serverless api javadoc tool (Aka SAJ).
 
     SAJ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,16 +18,34 @@
  */
 package com.agileandmore.serverlessapijavadoc.openapi;
 
-public class StringSchema {
+public class HeaderObject {
 
-    private String type = "string";
+    private String description = "";
+    private Boolean required = true;
+    private StringSchema schema = null;
 
-    public String getType() {
-        return type;
+    public String getDescription() {
+        return description;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getRequired() {
+        return required;
+    }
+
+    public void setRequired(Boolean required) {
+        this.required = required;
+    }
+
+    public StringSchema getSchema() {
+        return schema;
+    }
+
+    public void setSchema(StringSchema schema) {
+        this.schema = schema;
     }
 
 }

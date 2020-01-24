@@ -1,20 +1,20 @@
 /*
     Copyright 2020 Pascal Ognibene (pognibene@gmail.com)
 
-    This file is part of The serverless javadoc api tool.
+    This file is part of The serverless api javadoc api tool (Aka SAJ).
 
-    The javadoc api tool is free software: you can redistribute it and/or modify
+    SAJ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The javadoc api tool is distributed in the hope that it will be useful,
+    SAJ is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+    along with SAJ.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.agileandmore.serverlessapijavadoc.openapi;
 
@@ -22,8 +22,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ResponseObject {
+
     private String description = "";
-    //private Map<String, HeaderObject> headers = new HashMap<>();
+    private Map<String, HeaderObject> headers = new HashMap<>();
     private Map<String, MediaTypeObject> content = new HashMap<>();
     //links ?
 
@@ -42,6 +43,13 @@ public class ResponseObject {
     public void setContent(Map<String, MediaTypeObject> content) {
         this.content = content;
     }
-    
-    
+
+    public Map<String, HeaderObject> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, HeaderObject> headers) {
+        this.headers = headers;
+    }
+
 }

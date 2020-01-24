@@ -1,20 +1,20 @@
 /*
     Copyright 2020 Pascal Ognibene (pognibene@gmail.com)
 
-    This file is part of The serverless javadoc api tool.
+    This file is part of The serverless api javadoc api tool (Aka SAJ).
 
-    The javadoc api tool is free software: you can redistribute it and/or modify
+    SAJ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The javadoc api tool is distributed in the hope that it will be useful,
+    SAJ is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+    along with SAJ.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.agileandmore.serverlessapijavadoc;
 
@@ -289,7 +289,7 @@ public class WorkerClass {
                 PathItem pathItem = new PathItem();
                 openApi.getPaths().put(oneKey, pathItem);
 
-                //TODO populate the path item with all relevant operations
+                // populate the path item with all relevant operations
                 List<Handler> handlerList = handlerMap.get(oneKey);
                 for (Handler oneHandler : handlerList) {
 
@@ -300,6 +300,11 @@ public class WorkerClass {
 
                     populateParams(oneHandler.getQueryParams(), "query", operationObject);
                     populateParams(oneHandler.getPathParams(), "path", operationObject);
+                    populateParams(oneHandler.getHeaderInParams(), "header", operationObject);
+                    //FIXME problem : output headers may be attached to specific responses
+                    //rather than the handler?
+                    //which means they should be nested in responses, but we have only one tag?
+                    //how to express this?
 
                     // request body
                     if (oneHandler.getInputMessages().size() > 0) {
@@ -386,7 +391,7 @@ public class WorkerClass {
         } catch (IOException ex) {
             Logger.getLogger(WorkerClass.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         mapper = new ObjectMapper(new YAMLFactory());
         mapper.setSerializationInclusion(Include.NON_NULL);
         try {
@@ -604,6 +609,34 @@ public class WorkerClass {
                                 pathOrQueryParam.setName(tagName);
                                 pathOrQueryParam.setDocumentation(tagDocumentation);
                                 handler.getPathParams().add(pathOrQueryParam);
+                                break;
+                            }
+                        }
+                    } else if (oneTag.startsWith("ServerlessInputHeader")) {
+                        //TODO refactor, duplicated code (almost)
+                        oneTag = oneTag.substring("ServerlessInputHeader".length()).trim();
+                        for (int j = 0; j < oneTag.length(); j++) {
+                            if (oneTag.charAt(j) == ' ') {
+                                String tagName = oneTag.substring(0, j);
+                                String tagDocumentation = oneTag.substring(j).trim();
+                                PathOrQueryParam pathOrQueryParam = new PathOrQueryParam();
+                                pathOrQueryParam.setName(tagName);
+                                pathOrQueryParam.setDocumentation(tagDocumentation);
+                                handler.getHeaderInParams().add(pathOrQueryParam);
+                                break;
+                            }
+                        }
+                    } else if (oneTag.startsWith("ServerlessOutputHeader")) {
+                        //TODO refactor, duplicated code (almost)
+                        oneTag = oneTag.substring("ServerlessOutputHeader".length()).trim();
+                        for (int j = 0; j < oneTag.length(); j++) {
+                            if (oneTag.charAt(j) == ' ') {
+                                String tagName = oneTag.substring(0, j);
+                                String tagDocumentation = oneTag.substring(j).trim();
+                                PathOrQueryParam pathOrQueryParam = new PathOrQueryParam();
+                                pathOrQueryParam.setName(tagName);
+                                pathOrQueryParam.setDocumentation(tagDocumentation);
+                                handler.getHeaderOutParams().add(pathOrQueryParam);
                                 break;
                             }
                         }

@@ -17,15 +17,23 @@ paths:
         required: true
         schema:
           type: "string"
+      - name: "authorization"
+        in: "header"
+        description: "A JWT token to protect access to the API."
+        required: true
+        schema:
+          type: "string"
       responses:
         "200":
           description: "The array of Quotations for this User."
+          headers: {}
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.Quotation_Array"
         "400":
           description: "An error message if the user id is invalid."
+          headers: {}
           content:
             application/json:
               schema:
@@ -46,12 +54,14 @@ paths:
       responses:
         "201":
           description: "The Payment,\nupdated with the creation timestamp."
+          headers: {}
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.Quotation"
         "400":
           description: "An\nerror message if the Quotation attributes are invalid."
+          headers: {}
           content:
             application/json:
               schema:
@@ -73,12 +83,14 @@ paths:
       responses:
         "201":
           description: "The created User, with\nupdated information."
+          headers: {}
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.model.User"
         "409":
           description: "An error if the User already exists."
+          headers: {}
       requestBody:
         description: "The User to create."
         required: true
@@ -102,6 +114,7 @@ paths:
       responses:
         "200":
           description: "The User."
+          headers: {}
           content:
             application/json:
               schema:
@@ -109,12 +122,14 @@ paths:
         "400":
           description: "An error message if the User is trying to query another User\n\
             information, but does not have the proper role to do so."
+          headers: {}
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.views.ErrorMessage"
         "404":
           description: "An error message if the User does not exist."
+          headers: {}
           content:
             application/json:
               schema:
@@ -128,8 +143,10 @@ paths:
       responses:
         "200":
           description: "If the user has been updated with success."
+          headers: {}
         "404":
           description: "An error message if the User does not exist."
+          headers: {}
           content:
             application/json:
               schema:
@@ -149,8 +166,10 @@ paths:
       responses:
         "204":
           description: "If the User has been deleted successfully."
+          headers: {}
         "404":
           description: "An error message if the User does not exist."
+          headers: {}
           content:
             application/json:
               schema:

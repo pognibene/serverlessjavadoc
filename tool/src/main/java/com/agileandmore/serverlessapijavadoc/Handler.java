@@ -1,20 +1,20 @@
 /*
     Copyright 2020 Pascal Ognibene (pognibene@gmail.com)
 
-    This file is part of The serverless javadoc api tool.
+    This file is part of The serverless api javadoc api tool (Aka SAJ).
 
-    The javadoc api tool is free software: you can redistribute it and/or modify
+    SAJ is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    The javadoc api tool is distributed in the hope that it will be useful,
+    SAJ is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Foobar.  If not, see <https://www.gnu.org/licenses/>.
+    along with SAJ.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.agileandmore.serverlessapijavadoc;
 
@@ -31,15 +31,14 @@ public class Handler {
     private List<OutputMessage> outputMessages = new ArrayList<>();
     private List<PathOrQueryParam> queryParams = new ArrayList<>();
     private List<PathOrQueryParam> pathParams = new ArrayList<>();
+    private List<PathOrQueryParam> headerInParams = new ArrayList<>();
+    private List<PathOrQueryParam> headerOutParams = new ArrayList<>();
     private String documentation = "";
     private String name;
     private String uriPath;
     private String method;
     private Boolean cors;
 
-    // for responses, I can have multiple responses with different http codes and different output classes
-    // and multiple descriptions as well... so my javadoc tags must be enriched like a lot
-    //note : I could possibly also have multiple input messages??
     public String getQualifiedName() {
         return qualifiedName;
     }
@@ -118,6 +117,22 @@ public class Handler {
 
     public void setPathParams(List<PathOrQueryParam> pathParams) {
         this.pathParams = pathParams;
+    }
+
+    public List<PathOrQueryParam> getHeaderInParams() {
+        return headerInParams;
+    }
+
+    public void setHeaderInParams(List<PathOrQueryParam> headerInParams) {
+        this.headerInParams = headerInParams;
+    }
+
+    public List<PathOrQueryParam> getHeaderOutParams() {
+        return headerOutParams;
+    }
+
+    public void setHeaderOutParams(List<PathOrQueryParam> headerOutParams) {
+        this.headerOutParams = headerOutParams;
     }
 
 }
