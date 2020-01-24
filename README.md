@@ -108,6 +108,7 @@ you have to document the handler class with Javadoc style comment:
  * @ServerlessOutput 201 com.agileandmore.model.User The created User, with
  * updated information.
  * @ServerlessOutput 409 void An error if the User already exists.
+ * @ServerlessInputHeader authorization A JWT token to protect access to the API.
  */
 public class CreateUserHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
     @Override
@@ -142,6 +143,9 @@ the body of the ApiGatewayResponse, fo example User. You can have multiple outpu
 own http code, output class, and documentation.
 If if have a response with an http code but no output, you can use the special type **void** for
 the output message.
+#### @ServerlessInputHeader tag
+The tag, then the header name, then the description.
+Multiple input headers are managed by adding multiple tags for the different headers.
 
 ## Known limitations
 
