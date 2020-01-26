@@ -18,6 +18,7 @@
  */
 package com.agileandmore.serverlessapijavadoc;
 
+import com.agileandmore.serverlessapijavadoc.openapi.HeaderObject;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -225,6 +226,8 @@ public class WorkerClass {
 
                         if (events.size() > 0) {
                             for (Map<String, Object> o : events) {
+
+                                // FIXME I have a string instead of a maphere???
                                 Map<String, Object> http = (Map<String, Object>) o.get("http");
                                 if (http != null) {
                                     path = (String) http.get("path");
@@ -330,6 +333,7 @@ public class WorkerClass {
 
                         //populate response
                         responseObject.setDescription(outputMessage.getDocumentation());
+                        populateOutputHeaders(responseObject, outputMessage);
 
                         // if the return type is void, no schema generation
                         if (!outputMessage.getQualifiedClassName().toLowerCase().equals("void")) {
@@ -344,6 +348,7 @@ public class WorkerClass {
                         }
                     }
 
+                    //TODO change this, should be a map!
                     switch (oneHandler.getMethod()) {
                         case "get":
                             pathItem.setGet(operationObject);
@@ -512,6 +517,38 @@ public class WorkerClass {
         }
     }
 
+    private void populateResponseHeaders(String headersString, OutputMessage outputMessage) {
+        if (isEmpty(headersString)) {
+            return;
+        }
+        String sarray[] = headersString.split("\\R");
+        for (String s : sarray) {
+            // first token is the header name, the rest is the comment for it
+            int firstSpace = s.indexOf(" ");
+            if (firstSpace != -1) {
+                String name = s.substring(0, firstSpace).trim();
+                String documentation = s.substring(firstSpace).trim();
+
+                PathOrQueryParam pathOrQueryParam = new PathOrQueryParam();
+                pathOrQueryParam.setRequired(Boolean.TRUE);
+                pathOrQueryParam.setName(name);
+                pathOrQueryParam.setDocumentation(documentation);
+                outputMessage.getParams().add(pathOrQueryParam);
+            }
+        }
+    }
+
+    private void populateOutputHeaders(ResponseObject responseObject,
+            OutputMessage outputMessage) {
+        for (PathOrQueryParam p : outputMessage.getParams()) {
+            HeaderObject headerObject = new HeaderObject();
+            headerObject.setDescription(p.getDocumentation());
+            headerObject.setRequired(p.getRequired());
+            headerObject.setSchema(new StringSchema());
+            responseObject.getHeaders().put(p.getName(), headerObject);
+        }
+    }
+
     private class ClassVisitor extends VoidVisitorAdapter<Void> {
 
         public void visit(ClassOrInterfaceDeclaration n, Void arg) {
@@ -529,6 +566,8 @@ public class WorkerClass {
                     extractHandlerInformation(handler, rawComment);
 
                 } else if (rawComment.contains("@ServerlessModel")) {
+                    //FIXME we use annotation for model so not sure this code is still used
+                    //to clean up
 
                     ViewModel viewModel = new ViewModel();
                     models.add(viewModel);
@@ -578,6 +617,7 @@ public class WorkerClass {
                 handler.setDocumentation(documentation);
 
                 String tags = filteredComment.substring(i, filteredComment.length());
+
                 String[] tagArray = tags.split("@");
                 for (String oneTag : tagArray) {
 
@@ -626,21 +666,20 @@ public class WorkerClass {
                                 break;
                             }
                         }
-                    } else if (oneTag.startsWith("ServerlessOutputHeader")) {
-                        //TODO refactor, duplicated code (almost)
-                        oneTag = oneTag.substring("ServerlessOutputHeader".length()).trim();
-                        for (int j = 0; j < oneTag.length(); j++) {
-                            if (oneTag.charAt(j) == ' ') {
-                                String tagName = oneTag.substring(0, j);
-                                String tagDocumentation = oneTag.substring(j).trim();
-                                PathOrQueryParam pathOrQueryParam = new PathOrQueryParam();
-                                pathOrQueryParam.setName(tagName);
-                                pathOrQueryParam.setDocumentation(tagDocumentation);
-                                handler.getHeaderOutParams().add(pathOrQueryParam);
-                                break;
-                            }
-                        }
                     } else if (oneTag.startsWith("ServerlessOutput")) {
+
+                        // extract the (optional) section that contains the output headers
+                        // between {{ and }} that should be present only once
+                        // so find last {{ then last }} and if both present, extract the substring
+                        // then shorten the string and process separately TODO
+                        String headersString = null;
+                        int headersStart = oneTag.lastIndexOf("{{");
+                        int headersEnd = oneTag.lastIndexOf("}}");
+                        if (headersStart != -1 && headersEnd != -1) {
+                            headersString = oneTag.substring(headersStart, headersEnd + 2);
+                            oneTag = oneTag.substring(0, headersStart);
+                        }
+
                         oneTag = oneTag.substring("ServerlessOutput".length()).trim();
 
                         // find http code
@@ -689,6 +728,9 @@ public class WorkerClass {
                         outputMessage.setIsArray(isArray);
                         outputMessage.setQualifiedClassName(tagClass);
                         handler.getOutputMessages().add(outputMessage);
+
+                        // also add information about outgoing headers to the output message
+                        populateResponseHeaders(headersString, outputMessage);
 
                     } else if (oneTag.startsWith("ServerlessInput")) {
                         oneTag = oneTag.substring("ServerlessInput".length()).trim();

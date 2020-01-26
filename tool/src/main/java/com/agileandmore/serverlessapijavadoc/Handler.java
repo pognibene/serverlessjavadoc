@@ -32,7 +32,7 @@ public class Handler {
     private List<PathOrQueryParam> queryParams = new ArrayList<>();
     private List<PathOrQueryParam> pathParams = new ArrayList<>();
     private List<PathOrQueryParam> headerInParams = new ArrayList<>();
-    private List<PathOrQueryParam> headerOutParams = new ArrayList<>();
+    //private List<PathOrQueryParam> headerOutParams = new ArrayList<>();
     private String documentation = "";
     private String name;
     private String uriPath;
@@ -127,12 +127,12 @@ public class Handler {
         this.headerInParams = headerInParams;
     }
 
-    public List<PathOrQueryParam> getHeaderOutParams() {
-        return headerOutParams;
-    }
-
-    public void setHeaderOutParams(List<PathOrQueryParam> headerOutParams) {
-        this.headerOutParams = headerOutParams;
-    }
+//    public List<PathOrQueryParam> getHeaderOutParams() {
+//        return headerOutParams;
+//    }
+//
+//    public void setHeaderOutParams(List<PathOrQueryParam> headerOutParams) {
+//        this.headerOutParams = headerOutParams;
+//    }
 
 }

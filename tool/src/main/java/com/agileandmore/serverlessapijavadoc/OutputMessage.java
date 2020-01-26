@@ -18,12 +18,16 @@
  */
 package com.agileandmore.serverlessapijavadoc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OutputMessage {
 
     private String httpCode;
     private String documentation;
     private String qualifiedClassName;
     private Boolean isArray = false;
+    private List<PathOrQueryParam> params = new ArrayList<>();
 
     public String getHttpCode() {
         return httpCode;
@@ -55,6 +59,14 @@ public class OutputMessage {
 
     public void setIsArray(Boolean isArray) {
         this.isArray = isArray;
+    }
+
+    public List<PathOrQueryParam> getParams() {
+        return params;
+    }
+
+    public void setParams(List<PathOrQueryParam> params) {
+        this.params = params;
     }
 
 }

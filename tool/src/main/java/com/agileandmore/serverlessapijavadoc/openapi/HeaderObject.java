@@ -24,6 +24,9 @@ public class HeaderObject {
     private Boolean required = true;
     private StringSchema schema = null;
 
+    public HeaderObject() {
+    }
+
     public String getDescription() {
         return description;
     }

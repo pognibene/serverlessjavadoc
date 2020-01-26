@@ -12,8 +12,11 @@ import java.util.Map;
  * @ServerlessEndpoint
  * @ServerlessPathParam id the user ID (currently the international phone number). This parameter is mandatory.
  * @ServerlessOutput 200 com.agileandmore.examples.model.Quotation[] The array of Quotations for this User.
+ * {{
+ * x-next The url to get the next page of results
+ * foo another output header
+ * }}
  * @ServerlessOutput 400 com.agileandmore.examples.model.views.ErrorMessage An error message if the user id is invalid.
- * @ServerlessOutputHeader x-next The URL for the next page of data.
  * @ServerlessInputHeader authorization A JWT token to protect access to the API.
  */
 public class GetUserQuotationsHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
