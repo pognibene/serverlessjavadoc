@@ -27,7 +27,22 @@
         "responses" : {
           "200" : {
             "description" : "The array of Quotations for this User.",
-            "headers" : { },
+            "headers" : {
+              "foo" : {
+                "description" : "another output header",
+                "required" : true,
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "x-next" : {
+                "description" : "The url to get the next page of results",
+                "required" : true,
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
             "content" : {
               "application/json" : {
                 "schema" : {

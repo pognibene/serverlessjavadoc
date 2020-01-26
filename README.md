@@ -107,6 +107,10 @@ you have to document the handler class with Javadoc style comment:
  * @ServerlessInput com.agileandmore.model.User The User to create.
  * @ServerlessOutput 201 com.agileandmore.model.User The created User, with
  * updated information.
+ * {{
+ * x-foo one return header
+ * y-foo another returned header
+ * }}
  * @ServerlessOutput 409 void An error if the User already exists.
  * @ServerlessInputHeader authorization A JWT token to protect access to the API.
  */
@@ -136,6 +140,8 @@ The tag, then the fully scoped name of the input class, then the documentation t
 Note : the input class is *not* Map<String, Object>. Rather, it is the type you are going to extract
 from the body part of the incoming message, as wrapped by API Gateway before calling Lambda. Basically,
 the type actually used by the consumer.
+If the input type is an array of objects, use the fully scoped type of the class followed by [].
+Exemple : **com.agileandmore.User[]**
 #### @ServerlessOutput tag
 The tag, then the http code, then the fully scoped name of the output class, then the documentation text.
 Note : the output class is *not* ApiGatewayResponse. Rather, it is the type you are going to wrap as
@@ -143,6 +149,23 @@ the body of the ApiGatewayResponse, fo example User. You can have multiple outpu
 own http code, output class, and documentation.
 If if have a response with an http code but no output, you can use the special type **void** for
 the output message.
+If the output type is an array of objects, use the fully scoped type of the class followed by [].
+Exemple : **com.agileandmore.User[]**
+
+The Serverless output tag can also contain nested headers for each output. return headers must
+be enclosed between curly brackets, right after the ServerlessOutput tag itself:
+```
+* {{
+* x-foo one return header
+* y-foo another returned header
+* }}
+```
+each return header must be on a single line. Each line is made of:
+* the header name
+* then the header documentation
+
+Please note that all headers will have a simple String schema (for now)
+
 #### @ServerlessInputHeader tag
 The tag, then the header name, then the description.
 Multiple input headers are managed by adding multiple tags for the different headers.
@@ -152,7 +175,7 @@ Multiple input headers are managed by adding multiple tags for the different hea
 * The java bean validation annotations are not yet handled (JSR 380), to get better schemas. Support will probably be added in the future.
 * Gradle is not yet supported as a build system. The consequence is we can't build properly the java classpath
 for Gradle based project. Support may be added in the future.
-* the headers and security parts are not managed yet. This should come soon.
+* the security parts are not managed yet. This should come soon.
 * The documentation for Handler/Lambda functions is currently using Javadoc. While this is the standard way
  to do in Java, it means we have to combine annotations and Javadoc to get a complete documentation.
  This may change in the future, with annotations used for handlers as well. (besides, making a maven plugin
@@ -169,3 +192,4 @@ meaning that we can't produce a single open api document. Or we would have to me
 several documents in a post-processing phase.
 * no gradle plugin yet. More or less for the same reasons than maven.
 * path and query parameters only have the simple type string, complex schemas are not supported yet.
+* For now, all headers are considered required. Need to add some semantic to make them optional if desired.

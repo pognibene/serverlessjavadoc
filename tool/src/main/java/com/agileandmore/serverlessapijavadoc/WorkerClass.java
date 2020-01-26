@@ -189,12 +189,22 @@ public class WorkerClass {
             for (Path apiPath : apiList) {
 
                 try {
+                    System.out.println("reading yaml file " + apiPath.toAbsolutePath().toString());
+
                     InputStream ios = new FileInputStream(new File(apiPath.toAbsolutePath().toString()));
                     Map<String, Object> result = (Map<String, Object>) yaml.load(ios);
 
                     // check this is actually a serverless yaml file
-                    String serviceName = (String) result.get("service");
-                    if (isEmpty(serviceName)) {
+                    // FIXME looks like the type can vary here, sometimes a string, something
+                    // a map??
+                    Object stuff = result.getOrDefault("service", null);
+                    String serviceName = null;
+                    if (stuff instanceof String) {
+                        serviceName = (String) stuff;
+                        if (isEmpty(serviceName)) {
+                            continue;
+                        }
+                    } else {
                         continue;
                     }
 
@@ -205,17 +215,17 @@ public class WorkerClass {
                     api.setName(serviceName);
 
                     //TODO API global doc if it exists
-                    Map<String, Object> functions = (Map<String, Object>) result.get("functions");
+                    Map<String, Object> functions = (Map<String, Object>) result.getOrDefault("functions", null);
                     if (functions == null || functions.size() == 0) {
                         continue;
                     }
 
                     for (String s : functions.keySet()) {
-                        Map<String, Object> attributes = (Map<String, Object>) functions.get(s);
+                        Map<String, Object> attributes = (Map<String, Object>) functions.getOrDefault(s, null);
                         if (attributes == null || attributes.size() == 0) {
                             continue;
                         }
-                        String handler = (String) attributes.get("handler");
+                        String handler = (String) attributes.getOrDefault("handler", null);
                         String method = null;
                         String path = null;
                         Boolean cors = null;
@@ -226,19 +236,24 @@ public class WorkerClass {
 
                         if (events.size() > 0) {
                             for (Map<String, Object> o : events) {
-
-                                // FIXME I have a string instead of a maphere???
-                                Map<String, Object> http = (Map<String, Object>) o.get("http");
-                                if (http != null) {
-                                    path = (String) http.get("path");
-                                    if (path.endsWith("/")) {
-                                        path = path.substring(0, path.length() - 1);
+                                stuff = o.getOrDefault("http", null);
+                                
+                                // there are some strange, invalid serverless files
+                                // in some nodejs modules that will return a string
+                                // rather than a map here
+                                if (stuff instanceof Map) {
+                                    Map<String, Object> http = (Map<String, Object>) o.getOrDefault("http", null);
+                                    if (http != null) {
+                                        path = (String) http.get("path");
+                                        if (path.endsWith("/")) {
+                                            path = path.substring(0, path.length() - 1);
+                                        }
+                                        if (!path.startsWith("/")) {
+                                            path = "/" + path;
+                                        }
+                                        method = (String) http.getOrDefault("method", null);
+                                        cors = (Boolean) http.getOrDefault("cors", false);
                                     }
-                                    if (!path.startsWith("/")) {
-                                        path = "/" + path;
-                                    }
-                                    method = (String) http.get("method");
-                                    cors = (Boolean) http.get("cors");
                                 }
                             }
                         }
