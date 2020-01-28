@@ -64,20 +64,13 @@
             <artifactId>jackson-module-jsonSchema</artifactId>
             <version>2.10.1</version>
         </dependency>
-        
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.25</version>
-        </dependency>
-        
+         
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
         </dependency>
         
-        <!-- to lazily write yaml. could do with snakeyaml but it does not look very convenient -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>

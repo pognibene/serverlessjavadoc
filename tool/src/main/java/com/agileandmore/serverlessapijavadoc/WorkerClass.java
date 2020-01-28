@@ -19,13 +19,20 @@
 package com.agileandmore.serverlessapijavadoc;
 
 import com.agileandmore.serverlessapijavadoc.openapi.HeaderObject;
+import com.agileandmore.serverlessapijavadoc.openapi.MediaTypeObject;
+import com.agileandmore.serverlessapijavadoc.openapi.OpenApi;
+import com.agileandmore.serverlessapijavadoc.openapi.OperationObject;
+import com.agileandmore.serverlessapijavadoc.openapi.ParameterObject;
+import com.agileandmore.serverlessapijavadoc.openapi.PathItem;
+import com.agileandmore.serverlessapijavadoc.openapi.RequestBody;
+import com.agileandmore.serverlessapijavadoc.openapi.ResponseObject;
+import com.agileandmore.serverlessapijavadoc.openapi.StringSchema;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -39,22 +46,10 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
-import com.agileandmore.serverlessapijavadoc.openapi.MediaTypeObject;
-import com.agileandmore.serverlessapijavadoc.openapi.OpenApi;
-import com.agileandmore.serverlessapijavadoc.openapi.OperationObject;
-import com.agileandmore.serverlessapijavadoc.openapi.ParameterObject;
-import com.agileandmore.serverlessapijavadoc.openapi.PathItem;
-import com.agileandmore.serverlessapijavadoc.openapi.RequestBody;
-import com.agileandmore.serverlessapijavadoc.openapi.ResponseObject;
-import com.agileandmore.serverlessapijavadoc.openapi.StringSchema;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -72,9 +67,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
-import org.yaml.snakeyaml.Yaml;
 
 public class WorkerClass {
 
@@ -121,6 +116,7 @@ public class WorkerClass {
                 }
             }
 
+            //FIXME start of comment here
             List<URL> allUrls = new ArrayList<>();
             for (String oneClasspath : classPaths) {
                 URL oneUrl = new URL("file:" + oneClasspath);
@@ -185,102 +181,20 @@ public class WorkerClass {
                 cu.accept(new ClassVisitor(), null);
             }
 
-            Yaml yaml = new Yaml();
+            //FIXME end of comment here
             for (Path apiPath : apiList) {
 
-                try {
-                    System.out.println("reading yaml file " + apiPath.toAbsolutePath().toString());
-
-                    InputStream ios = new FileInputStream(new File(apiPath.toAbsolutePath().toString()));
-                    Map<String, Object> result = (Map<String, Object>) yaml.load(ios);
-
-                    // check this is actually a serverless yaml file
-                    // FIXME looks like the type can vary here, sometimes a string, something
-                    // a map??
-                    Object stuff = result.getOrDefault("service", null);
-                    String serviceName = null;
-                    if (stuff instanceof String) {
-                        serviceName = (String) stuff;
-                        if (isEmpty(serviceName)) {
-                            continue;
-                        }
-                    } else {
-                        continue;
-                    }
-
-                    // don't add the api to the list yet, as we are not sure it's really
-                    // a serverless file. If we don't find any http endpoint in it, we will
-                    // not add it to the list.
-                    Api api = new Api();
-                    api.setName(serviceName);
-
-                    //TODO API global doc if it exists
-                    Map<String, Object> functions = (Map<String, Object>) result.getOrDefault("functions", null);
-                    if (functions == null || functions.size() == 0) {
-                        continue;
-                    }
-
-                    for (String s : functions.keySet()) {
-                        Map<String, Object> attributes = (Map<String, Object>) functions.getOrDefault(s, null);
-                        if (attributes == null || attributes.size() == 0) {
-                            continue;
-                        }
-                        String handler = (String) attributes.getOrDefault("handler", null);
-                        String method = null;
-                        String path = null;
-                        Boolean cors = null;
-                        String handlerName = s;
-
-                        List<Map<String, Object>> empty = new ArrayList<>();
-                        List<Map<String, Object>> events = (List<Map<String, Object>>) attributes.getOrDefault("events", empty);
-
-                        if (events.size() > 0) {
-                            for (Map<String, Object> o : events) {
-                                stuff = o.getOrDefault("http", null);
-                                
-                                // there are some strange, invalid serverless files
-                                // in some nodejs modules that will return a string
-                                // rather than a map here
-                                if (stuff instanceof Map) {
-                                    Map<String, Object> http = (Map<String, Object>) o.getOrDefault("http", null);
-                                    if (http != null) {
-                                        path = (String) http.get("path");
-                                        if (path.endsWith("/")) {
-                                            path = path.substring(0, path.length() - 1);
-                                        }
-                                        if (!path.startsWith("/")) {
-                                            path = "/" + path;
-                                        }
-                                        method = (String) http.getOrDefault("method", null);
-                                        cors = (Boolean) http.getOrDefault("cors", false);
-                                    }
-                                }
-                            }
-                        }
-                        if (method != null && path != null) {
-                            for (Handler oneHandler : handlers) {
-                                if (oneHandler.getQualifiedName().compareTo(handler) == 0) {
-                                    api.getHandlers().add(oneHandler);
-                                    oneHandler.setUriPath(path);
-                                    oneHandler.setMethod(method);
-                                    oneHandler.setCors(cors);
-                                    oneHandler.setName(handlerName);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (api.getHandlers().size() > 0) {
-                        apis.add(api);
-                    }
-                } catch (FileNotFoundException ex) {
-                    // the file should always exist...
+                Api oneApi = readOneServerlessFile(apiPath);
+                if (oneApi != null && oneApi.getHandlers().size() > 0) {
+                    apis.add(oneApi);
                 }
             }
-
         } catch (IOException ex) {
             Logger.getLogger(EntryPoint.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        //FIXME
+       // System.exit(0);
 
         OpenApi openApi = new OpenApi();
         Map<String, JsonNode> schemasMap = new HashMap<>();
@@ -319,10 +233,6 @@ public class WorkerClass {
                     populateParams(oneHandler.getQueryParams(), "query", operationObject);
                     populateParams(oneHandler.getPathParams(), "path", operationObject);
                     populateParams(oneHandler.getHeaderInParams(), "header", operationObject);
-                    //FIXME problem : output headers may be attached to specific responses
-                    //rather than the handler?
-                    //which means they should be nested in responses, but we have only one tag?
-                    //how to express this?
 
                     // request body
                     if (oneHandler.getInputMessages().size() > 0) {
@@ -419,6 +329,151 @@ public class WorkerClass {
         } catch (IOException ex) {
             Logger.getLogger(WorkerClass.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private Api readOneServerlessFile(Path apiPath) {
+
+        System.out.println("Reading file " + apiPath.toAbsolutePath().toString());
+
+        Api api = new Api();
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+
+        try {
+            JsonNode rootNode = mapper.readTree(new File(apiPath.toAbsolutePath().toString()));
+
+            JsonNode oneNode = rootNode.path("service");
+            if (!oneNode.isMissingNode() && oneNode.getNodeType() == JsonNodeType.STRING) {
+                api.setName(oneNode.asText());
+            } else {
+                return null;
+            }
+
+            boolean hasDomainManager = false;
+            oneNode = rootNode.path("plugins");
+            if (!oneNode.isMissingNode() && oneNode.isArray()) {
+                Iterator<JsonNode> iter = oneNode.iterator();
+                while (iter.hasNext()) {
+                    JsonNode arg = iter.next();
+                    if (arg.isTextual()) {
+                        if (arg.asText().equals("serverless-domain-manager")) {
+                            hasDomainManager = true;
+                        }
+                    }
+                }
+            }
+
+            Map<String, String> domains = new HashMap<>();
+            oneNode = rootNode.path("custom").path("domains");
+            if (!oneNode.isMissingNode() && oneNode.isObject()) {
+                Iterator<Map.Entry<String, JsonNode>> iter2 = ((ObjectNode) oneNode).fields();
+                while (iter2.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = iter2.next();
+                    if (entry.getValue().isTextual()) {
+                        domains.put(entry.getKey(), entry.getValue().toString());
+                    }
+                }
+            }
+
+            String basePath = null;
+            oneNode = rootNode.path("custom").path("customDomain").path("basePath");
+            if (!oneNode.isMissingNode() && oneNode.isTextual()) {
+                basePath = oneNode.asText();
+                if (basePath.endsWith("/")) {
+                    basePath = basePath.substring(0, basePath.length() - 1);
+                }
+                if (!basePath.startsWith("/")) {
+                    basePath = "/" + basePath;
+                }
+            }
+
+            oneNode = rootNode.path("functions");
+            // functions is an object
+            if (!oneNode.isMissingNode() && oneNode.isObject()) {
+                Iterator<Map.Entry<String, JsonNode>> iter2 = ((ObjectNode) oneNode).fields();
+                while (iter2.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = iter2.next();
+
+                    String handlerName = entry.getKey();
+                    String handlerClass = null;
+                    String handlerPath = null;
+                    String handlerMethod = null;
+                    boolean handlerCors = false;
+
+                    // each attribute is an object
+                    if (entry.getValue().isObject()) {
+                        JsonNode handlerNode = entry.getValue().path("handler");
+                        if (!handlerNode.isMissingNode() && handlerNode.isTextual()) {
+                            handlerClass = handlerNode.asText();
+                        }
+
+                        // but events is an array of objects
+                        JsonNode eventsNode = entry.getValue().path("events");
+                        if (!eventsNode.isMissingNode() && eventsNode.isArray()) {
+                            Iterator<JsonNode> iter3 = ((ArrayNode) eventsNode).elements();
+                            while (iter3.hasNext()) {
+                                JsonNode arrayNode = iter3.next();
+                                if (arrayNode.isObject()) {
+                                    // I shall have only one http event for one handler
+                                    JsonNode pathNode = arrayNode.path("http").path("path");
+                                    if (!pathNode.isMissingNode() && pathNode.isTextual()) {
+                                        handlerPath = pathNode.asText();
+                                        if (handlerPath.endsWith("/")) {
+                                            handlerPath = handlerPath.substring(0, handlerPath.length() - 1);
+                                        }
+                                        if (!handlerPath.startsWith("/")) {
+                                            handlerPath = "/" + handlerPath;
+                                        }
+                                    }
+
+                                    pathNode = arrayNode.path("http").path("method");
+                                    if (!pathNode.isMissingNode() && pathNode.isTextual()) {
+                                        handlerMethod = pathNode.asText();
+                                    }
+
+                                    pathNode = arrayNode.path("http").path("cors");
+                                    if (!pathNode.isMissingNode() && pathNode.isBoolean()) {
+                                        handlerCors = pathNode.asBoolean();
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    //TODO should not use class / global variable here
+                    //also instead of browsing handlers I'd rather use a map for performance?
+                    //or maybe I shall pass the handlers list as a parameter
+                    //to avoid side effects
+                    if (isNotEmpty(handlerPath)
+                            && isNotEmpty(handlerMethod)) {
+                        for (Handler oneHandler : handlers) {
+                            if (oneHandler.getQualifiedName().compareTo(handlerClass) == 0) {
+                                api.getHandlers().add(oneHandler);
+                                oneHandler.setUriPath(handlerPath);
+                                oneHandler.setMethod(handlerMethod);
+                                oneHandler.setCors(handlerCors);
+                                oneHandler.setName(handlerName);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (hasDomainManager) {
+                for (String key : domains.keySet()) {
+                    String url = domains.get(key);
+                    url = "https://" + url;
+                    if (isNotEmpty(basePath)) {
+                        url = url + basePath;
+                    }
+                    api.getUrls().put(key, url);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return api;
     }
 
     private void createSchema(String qualifiedClassName, Map schemasMap, boolean isArray, URLClassLoader cl2, JacksonModule jacksonModule) {

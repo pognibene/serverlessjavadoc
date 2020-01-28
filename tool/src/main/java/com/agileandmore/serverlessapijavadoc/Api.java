@@ -19,13 +19,16 @@
 package com.agileandmore.serverlessapijavadoc;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Api {
 
     private String name = "";
     private String documentation = "";
     private List<Handler> handlers = new ArrayList<>();
+    private Map<String, String> urls = new HashMap<>();
 
     public String getName() {
         return name;
@@ -49,6 +52,14 @@ public class Api {
 
     public void setHandlers(List<Handler> handlers) {
         this.handlers = handlers;
+    }
+
+    public Map<String, String> getUrls() {
+        return urls;
+    }
+
+    public void setUrls(Map<String, String> urls) {
+        this.urls = urls;
     }
 
 }
