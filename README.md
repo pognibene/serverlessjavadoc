@@ -170,6 +170,72 @@ Please note that all headers will have a simple String schema (for now)
 The tag, then the header name, then the description.
 Multiple input headers are managed by adding multiple tags for the different headers.
 
+### Documenting the deployment URLs
+By default, when one deploys APIs with AWS API Gateway and AWS Lambda, the API is
+deployed on a random, generated URL like:
+```
+https://qhmwkki2ng.execute-api.ap-myregion-1.amazonaws.com/dev/api/v1/users/login
+```
+
+However, it is usually desirable to have APIs deployed on fixed URLs, 
+depending on the target environment.
+
+With Serverless, there is an existing plugin that can enable deployment on a custom URL :
+the serverless-domain-manager plugin. We can use the configuration for this
+plugin to generate URL information in the open api 3 document we generate.
+```
+plugins:
+  - serverless-domain-manager
+```
+In this section of the serverless.yaml file, we must find the serverless-domain-manager plugin.
+```
+custom:
+  domains:
+    prod: myprodurl.com
+    dev: mydevurl.com
+    preprod: mypreprodurl.com
+  customDomain:
+    domainName: ${self:custom.domains.${self:provider.stage}}
+    basePath: "mybasepath"
+    stage: ${self:provider.stage}
+    createRoute53Record: true
+    endpointType: "regional"
+```
+In the custom section of the serverless file, we must have a domains sub section, then all the 
+domains this api can be deployed on. For example, the 'prod' deployment will use
+the 'myprodurl.com' domain.
+
+We must also have a 'customDomain' sub section, which is used by the serverless-domain-manager
+plugin. From this sub section, we just extract the optional 'basePath' value.
+If basePath is set, the deployment URLs will be:
+```
+https:// + the domain + basePath (if it exists)
+```
+In the above case, we would generate 3 URLS:
+```
+https://myprodurl.com/mybasepath
+https://mydevurl.com/mybasepath
+https://mypreprodurl.com/mybasepath
+```
+Respectively for the prod, dev, preprod environments.
+
+These URLs are stored as per Open Api 3.0 specs, in a servers section of a PathItem.
+Here's an example:
+```
+"servers" : [ {
+        "url" : "https://prod.company.com/payments",
+        "description" : "The server for the prod environment.",
+        "variables" : { }
+      }, {
+        "url" : "https://dev.company.com/payments",
+        "description" : "The server for the dev environment.",
+        "variables" : { }
+      }, {
+        "url" : "https://preprod.company.com/payments",
+        "description" : "The server for the preprod environment.",
+        "variables" : { }
+      } ]
+```
 ## Known limitations
 
 * The java bean validation annotations are not yet handled (JSR 380), to get better schemas. Support will probably be added in the future.
@@ -181,10 +247,6 @@ for Gradle based project. Support may be added in the future.
  This may change in the future, with annotations used for handlers as well. (besides, making a maven plugin
  for the tool kind of requires this)
 * The classpath building is a bit slow. This is actually a limitation of maven.
-* The generated open api document has no servers definitions. This is a limitation of the serverless.yaml files,
-as there's no standard way to declare the URL where an API is to be deployed. We may add some support
-for the serverless-domain-manager though to make this better. Or use a specific
-documentation tag in the serverless file for ease of use.
 * no maven plugin yet. There are some specific limitations with maven, the first one
 being that we can't easily analyse the source code outside of the current module. So we'll have to revert to
 compiled class and annotation analysis for everything, including Handler documentation. Also, only one API can be documented at a time,
