@@ -18,7 +18,9 @@
  */
 package com.agileandmore.serverlessapijavadoc.openapi;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PathItem {
@@ -35,15 +37,10 @@ public class PathItem {
     private OperationObject head = null;
     private OperationObject patch = null;
     private OperationObject trace = null;
+    private List<Server> servers = new ArrayList<>();
 
-    //FIXME essai : ajouter 2 operations dans le path
-//    public PathItem() {
-//        get = new OperationObject();
-//        post = new OperationObject();
-//    }
     // we don't use parameters here as there no good reason
     // to have common parameters for all operations
-    // we don't use servers here, can't see the use of it
     public String getSummary() {
         return summary;
     }
@@ -122,6 +119,14 @@ public class PathItem {
 
     public void setTrace(OperationObject trace) {
         this.trace = trace;
+    }
+
+    public List<Server> getServers() {
+        return servers;
+    }
+
+    public void setServers(List<Server> servers) {
+        this.servers = servers;
     }
 
 }

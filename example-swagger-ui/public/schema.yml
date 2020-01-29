@@ -83,6 +83,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/com.agileandmore.examples.model.Quotation"
+    servers: []
   /api/v1/users:
     post:
       summary: "createUser"
@@ -108,6 +109,7 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/com.agileandmore.model.User"
+    servers: []
   /api/v1/users/{mobile}:
     get:
       summary: "findUserByPhone"
@@ -184,6 +186,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.views.ErrorMessage"
+    servers: []
 components:
   schemas:
     com.agileandmore.examples.model.Quotation:

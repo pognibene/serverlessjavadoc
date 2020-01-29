@@ -26,6 +26,7 @@ import com.agileandmore.serverlessapijavadoc.openapi.ParameterObject;
 import com.agileandmore.serverlessapijavadoc.openapi.PathItem;
 import com.agileandmore.serverlessapijavadoc.openapi.RequestBody;
 import com.agileandmore.serverlessapijavadoc.openapi.ResponseObject;
+import com.agileandmore.serverlessapijavadoc.openapi.Server;
 import com.agileandmore.serverlessapijavadoc.openapi.StringSchema;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -183,7 +184,6 @@ public class WorkerClass {
 
             //FIXME end of comment here
             for (Path apiPath : apiList) {
-
                 Api oneApi = readOneServerlessFile(apiPath);
                 if (oneApi != null && oneApi.getHandlers().size() > 0) {
                     apis.add(oneApi);
@@ -194,8 +194,7 @@ public class WorkerClass {
         }
 
         //FIXME
-       // System.exit(0);
-
+        // System.exit(0);
         OpenApi openApi = new OpenApi();
         Map<String, JsonNode> schemasMap = new HashMap<>();
 
@@ -220,6 +219,16 @@ public class WorkerClass {
             for (String oneKey : keys) {
                 PathItem pathItem = new PathItem();
                 openApi.getPaths().put(oneKey, pathItem);
+
+                // if we have information about the deployment urls, put them
+                // in the server section of the path item
+                for (String s : oneApi.getUrls().keySet()) {
+                    String oneUrl = oneApi.getUrls().get(s);
+                    Server server = new Server();
+                    server.setUrl(oneUrl);
+                    server.setDescription("The server for the " + s + " environment.");
+                    pathItem.getServers().add(server);
+                }
 
                 // populate the path item with all relevant operations
                 List<Handler> handlerList = handlerMap.get(oneKey);
@@ -332,9 +341,6 @@ public class WorkerClass {
     }
 
     private Api readOneServerlessFile(Path apiPath) {
-
-        System.out.println("Reading file " + apiPath.toAbsolutePath().toString());
-
         Api api = new Api();
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -369,7 +375,7 @@ public class WorkerClass {
                 while (iter2.hasNext()) {
                     Map.Entry<String, JsonNode> entry = iter2.next();
                     if (entry.getValue().isTextual()) {
-                        domains.put(entry.getKey(), entry.getValue().toString());
+                        domains.put(entry.getKey(), entry.getValue().asText());
                     }
                 }
             }

@@ -112,7 +112,8 @@
             }
           }
         }
-      }
+      },
+      "servers" : [ ]
     },
     "/api/v1/users" : {
       "post" : {
@@ -148,7 +149,8 @@
             }
           }
         }
-      }
+      },
+      "servers" : [ ]
     },
     "/api/v1/users/{mobile}" : {
       "get" : {
@@ -253,7 +255,8 @@
             }
           }
         }
-      }
+      },
+      "servers" : [ ]
     }
   },
   "components" : {
