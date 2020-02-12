@@ -56,6 +56,8 @@ import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -115,6 +117,8 @@ public class WorkerClass {
                     classNames.add(classNode.name.replace("/", "."));
                 } else if (spath.endsWith("pom.xml")) {
                     pomList.add(path);
+                } else if (spath.endsWith("build.gradle")) {
+                    gradleList.add(path);
                 }
             }
 
@@ -132,7 +136,7 @@ public class WorkerClass {
             Set<String> jarset = new HashSet<>();
             String tempDir = System.getProperty("java.io.tmpdir");
             String tmpFile = tempDir + File.separator + "cp.txt";
-            
+
             for (Path onePath : pomList) {
                 String spath = onePath.toAbsolutePath().toString();
                 // TODO make maven command configurable
@@ -167,6 +171,58 @@ public class WorkerClass {
                     Logger.getLogger(WorkerClass.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+
+            for (Path onePath : gradleList) {
+                String spath = onePath.toAbsolutePath().toString();
+                
+                
+                System.out.println("process gradle " + spath);
+//                // TODO make gradle command configurable
+//
+                Path copied = Paths.get(spath + ".copy");
+
+                String newTask = "task SlsdocPrintClasspath {\n"
+                        + "    doLast {\n"
+                        + "        configurations.testRuntime.each { println it }\n"
+                        + "    }\n"
+                        + "}\n";
+                Files.copy(onePath, copied, StandardCopyOption.REPLACE_EXISTING);
+                Files.write(copied, newTask.getBytes(), StandardOpenOption.APPEND);
+
+                // first make a copy of the current gradle file
+                // append a task at the end before executing
+//                ProcessBuilder builder = new ProcessBuilder("mvn", "-f", spath,
+//                        "dependency:build-classpath", "-Dmdep.outputFile="
+//                        + tmpFile);
+//                Process process = builder.start();
+//
+//                StringBuilder out = new StringBuilder();
+//                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+//                    String line = null;
+//                    while ((line = reader.readLine()) != null) {
+//                        out.append(line);
+// TODO could filter if the line does not end with .jar
+//                        out.append("\n");
+//                    }
+//                    System.out.println(out);
+//                }
+//
+//                try {
+//                    int result = process.waitFor();
+//                    if (result == 0) {
+//                        String jarPath = readAllBytesJava7(tmpFile);
+//                        String[] jarPathTab = jarPath.split(":");
+//                        for (String s : jarPathTab) {
+//                            s = s.replace("\\R", "").trim();
+//                            if (!isEmpty(s)) {
+//                                jarset.add(s);
+//                            }
+//                        }
+//                    }
+//                } catch (InterruptedException ex) {
+//                    Logger.getLogger(WorkerClass.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+           }
 
             for (String s : jarset) {
                 allUrls.add(new URL("file:" + s));

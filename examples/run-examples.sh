@@ -12,12 +12,12 @@ mvn clean compile
 cd ..
 ROOT=$(pwd)
 cd tool
-mvn clean package
+mvn clean install
 java -jar target/serverless-api-javadoc-1.0.jar ${ROOT}/examples ${ROOT}/example-swagger-ui/public
-cd ../example-swagger-ui
-rm -rf build
-PUBLIC_URL=http://localhost:3000
-yarn
-#PUBLIC_URL=${PUBLIC_URL} yarn build
-yarn start
+#cd ../example-swagger-ui
+#rm -rf build
+#PUBLIC_URL=http://localhost:3000
+#yarn
+##PUBLIC_URL=${PUBLIC_URL} yarn build
+#yarn start
 
