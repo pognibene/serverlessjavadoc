@@ -93,6 +93,7 @@ public class WorkerClass {
             List<Path> apiList = new ArrayList<>();
             List<String> classNames = new ArrayList<>();
             List<Path> pomList = new ArrayList<>();
+            List<Path> gradleList = new ArrayList<>();
 
             for (Path path : list) {
                 String spath = path.toAbsolutePath().toString().toLowerCase();
@@ -117,7 +118,6 @@ public class WorkerClass {
                 }
             }
 
-            //FIXME start of comment here
             List<URL> allUrls = new ArrayList<>();
             for (String oneClasspath : classPaths) {
                 URL oneUrl = new URL("file:" + oneClasspath);
@@ -132,6 +132,7 @@ public class WorkerClass {
             Set<String> jarset = new HashSet<>();
             String tempDir = System.getProperty("java.io.tmpdir");
             String tmpFile = tempDir + File.separator + "cp.txt";
+            
             for (Path onePath : pomList) {
                 String spath = onePath.toAbsolutePath().toString();
                 // TODO make maven command configurable
@@ -182,7 +183,6 @@ public class WorkerClass {
                 cu.accept(new ClassVisitor(), null);
             }
 
-            //FIXME end of comment here
             for (Path apiPath : apiList) {
                 Api oneApi = readOneServerlessFile(apiPath);
                 if (oneApi != null && oneApi.getHandlers().size() > 0) {
@@ -193,8 +193,6 @@ public class WorkerClass {
             Logger.getLogger(EntryPoint.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        //FIXME
-        // System.exit(0);
         OpenApi openApi = new OpenApi();
         Map<String, JsonNode> schemasMap = new HashMap<>();
 
