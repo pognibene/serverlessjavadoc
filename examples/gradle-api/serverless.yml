@@ -1,0 +1,25 @@
+service: gradle-api
+
+custom:
+  deploymentUrls:
+    prod: https://my-prod-url-gradle.com
+    dev: https://my-dev-url-gradle.com
+    preprod: https://my-preprod-url-gradle.com
+
+provider:
+  name: aws
+  runtime: java8
+  stage: ${opt:stage, 'dev'}
+  region: ap-southeast-1
+    
+package:
+  artifact: target/gradle-api-1.0-SNAPSHOT.jar
+
+functions:
+  createGradle:
+    handler: com.agileandmore.examples.handler.CreateGradleHandler
+    events:
+      - http:
+          path: api/v1/gradles
+          method: post
+          cors: true

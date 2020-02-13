@@ -174,11 +174,10 @@ public class WorkerClass {
 
             for (Path onePath : gradleList) {
                 String spath = onePath.toAbsolutePath().toString();
-                
-                
+
                 System.out.println("process gradle " + spath);
-//                // TODO make gradle command configurable
-//
+                // TODO make gradle command configurable
+
                 Path copied = Paths.get(spath + ".copy");
 
                 String newTask = "task SlsdocPrintClasspath {\n"
@@ -189,26 +188,26 @@ public class WorkerClass {
                 Files.copy(onePath, copied, StandardCopyOption.REPLACE_EXISTING);
                 Files.write(copied, newTask.getBytes(), StandardOpenOption.APPEND);
 
-                // first make a copy of the current gradle file
-                // append a task at the end before executing
-//                ProcessBuilder builder = new ProcessBuilder("mvn", "-f", spath,
-//                        "dependency:build-classpath", "-Dmdep.outputFile="
-//                        + tmpFile);
-//                Process process = builder.start();
-//
-//                StringBuilder out = new StringBuilder();
-//                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-//                    String line = null;
-//                    while ((line = reader.readLine()) != null) {
-//                        out.append(line);
-// TODO could filter if the line does not end with .jar
-//                        out.append("\n");
-//                    }
-//                    System.out.println(out);
-//                }
-//
-//                try {
-//                    int result = process.waitFor();
+                ProcessBuilder builder = new ProcessBuilder("gradle", "-b", copied.toAbsolutePath().toString(),
+                        "-Dorg.gradle.logging.level=quiet", "SlsdocPrintClasspath");
+                Process process = builder.start();
+
+                //StringBuilder out = new StringBuilder();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line = null;
+                    while ((line = reader.readLine()) != null) {
+                        jarset.add(line);
+                        // should append the line directly
+
+                        //out.append(line);
+                        //TODO could filter if the line does not end with .jar
+                        //out.append("\n");
+                    }
+                    //System.out.println(out);
+                }
+
+                try {
+                    int result = process.waitFor();
 //                    if (result == 0) {
 //                        String jarPath = readAllBytesJava7(tmpFile);
 //                        String[] jarPathTab = jarPath.split(":");
@@ -219,10 +218,10 @@ public class WorkerClass {
 //                            }
 //                        }
 //                    }
-//                } catch (InterruptedException ex) {
-//                    Logger.getLogger(WorkerClass.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-           }
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(WorkerClass.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
 
             for (String s : jarset) {
                 allUrls.add(new URL("file:" + s));

@@ -24,19 +24,4 @@ public class EntryPoint {
         WorkerClass newClass = new WorkerClass();
         newClass.start(args[0], args[1]);
     }
-    
-    // gradle -Dorg.gradle.logging.level=quiet printClasspath
-    // TODO command line to generate dependencies for a gradle build
-    // file must be named build.gradle (or at least end with .gradle)
-    /*
-    task printClasspath {
-    doLast {
-        configurations.testRuntime.each { println it }
-    }
-}
-    
-    need to append this task at the end of each gradle file before running the command and
-    getting the dependencies. So create a temporary file next to the original one and run this one instead
-    then delete it (or leave it)
-    */
 }
