@@ -9,7 +9,10 @@
 # the reactjs documentation page.
 
 mvn clean compile
-cd ..
+cd gradle-api
+gradle clean build
+cd ../..
+
 ROOT=$(pwd)
 cd tool
 mvn clean install

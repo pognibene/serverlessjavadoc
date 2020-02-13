@@ -115,6 +115,36 @@
       },
       "servers" : [ ]
     },
+    "/api/v1/gradles" : {
+      "post" : {
+        "summary" : "createGradle",
+        "description" : "Create a new Gradle in the system.\nBecause Gradles don't really exist in real life, this does not create much.",
+        "tags" : [ "gradle-api" ],
+        "parameters" : [ ],
+        "responses" : {
+          "201" : {
+            "description" : "if the Gradle has been created.",
+            "headers" : { }
+          },
+          "409" : {
+            "description" : "An error if the Gradle already exists.",
+            "headers" : { }
+          }
+        },
+        "requestBody" : {
+          "description" : "A dummy message.",
+          "required" : true,
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/java.lang.String"
+              }
+            }
+          }
+        }
+      },
+      "servers" : [ ]
+    },
     "/api/v1/users" : {
       "post" : {
         "summary" : "createUser",
@@ -306,6 +336,9 @@
         "items" : {
           "$ref" : "#/components/schemas/com.agileandmore.examples.model.Quotation"
         }
+      },
+      "java.lang.String" : {
+        "type" : "string"
       },
       "com.agileandmore.examples.model.views.ErrorMessage" : {
         "type" : "object",

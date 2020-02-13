@@ -192,32 +192,15 @@ public class WorkerClass {
                         "-Dorg.gradle.logging.level=quiet", "SlsdocPrintClasspath");
                 Process process = builder.start();
 
-                //StringBuilder out = new StringBuilder();
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line = null;
                     while ((line = reader.readLine()) != null) {
                         jarset.add(line);
-                        // should append the line directly
-
-                        //out.append(line);
-                        //TODO could filter if the line does not end with .jar
-                        //out.append("\n");
                     }
-                    //System.out.println(out);
                 }
 
                 try {
-                    int result = process.waitFor();
-//                    if (result == 0) {
-//                        String jarPath = readAllBytesJava7(tmpFile);
-//                        String[] jarPathTab = jarPath.split(":");
-//                        for (String s : jarPathTab) {
-//                            s = s.replace("\\R", "").trim();
-//                            if (!isEmpty(s)) {
-//                                jarset.add(s);
-//                            }
-//                        }
-//                    }
+                    process.waitFor();
                 } catch (InterruptedException ex) {
                     Logger.getLogger(WorkerClass.class.getName()).log(Level.SEVERE, null, ex);
                 }

@@ -6,13 +6,13 @@ import com.agileandmore.examples.model.views.ApiGatewayResponse;
 import java.util.Map;
 
 /**
- * Create a new User in the system.
+ * Create a new Gradle in the system.
+ * Because Gradles don't really exist in real life, this does not create much.
  *
  * @ServerlessEndpoint
- * @ServerlessInput com.agileandmore.model.User The User to create.
- * @ServerlessOutput 201 com.agileandmore.model.User The created User, with
- * updated information.
- * @ServerlessOutput 409 void An error if the User already exists.
+ * @ServerlessInput java.lang.String A dummy message.
+ * @ServerlessOutput 201 void if the Gradle has been created.
+ * @ServerlessOutput 409 void An error if the Gradle already exists.
  */
 public class CreateGradleHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 
