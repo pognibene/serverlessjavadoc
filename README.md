@@ -57,9 +57,7 @@ You can find a working example in the folder examples. (TODO)
 
 
 ## Supported functionality
-Currently, the tool assumes that all your serverless java lambdas are built using maven.
-Gradle support may come in the future, and potentially support for arbitrary build systems
-if there's demand for it.
+Currently, the tool assumes that all your serverless java lambdas are built either using maven or gradle.
 
 ## How to document and annotate your handlers and models
 ### Documenting your models
@@ -239,14 +237,11 @@ Here's an example:
 ## Known limitations
 
 * The java bean validation annotations are not yet handled (JSR 380), to get better schemas. Support will probably be added in the future.
-* Gradle is not yet supported as a build system. The consequence is we can't build properly the java classpath
-for Gradle based project. Support may be added in the future.
 * the security parts are not managed yet. This should come soon.
 * The documentation for Handler/Lambda functions is currently using Javadoc. While this is the standard way
  to do in Java, it means we have to combine annotations and Javadoc to get a complete documentation.
  This may change in the future, with annotations used for handlers as well. (besides, making a maven plugin
  for the tool kind of requires this)
-* The classpath building is a bit slow. This is actually a limitation of maven.
 * no maven plugin yet. There are some specific limitations with maven, the first one
 being that we can't easily analyse the source code outside of the current module. So we'll have to revert to
 compiled class and annotation analysis for everything, including Handler documentation. Also, only one API can be documented at a time,
