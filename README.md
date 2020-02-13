@@ -53,7 +53,7 @@ Please note that gradle based builds are not yet supported (but this will most l
 This file can then imported in a variety of tools like swagger UI for visualisation.
 
 ## Examples
-You can find a working example in the folder examples. (TODO)
+You can find a working example in the [example folder](https://github.com/pognibene/serverlessjavadoc/tree/master/examples).
 
 
 ## Supported functionality
