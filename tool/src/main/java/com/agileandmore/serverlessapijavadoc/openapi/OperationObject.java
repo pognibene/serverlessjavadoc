@@ -35,12 +35,28 @@ public class OperationObject {
     // an interface or abstract top class in this list, but what's the 
     // point exactly? path parameters or query parameters are not
     // supposed to be structured types, otherwise it would be a complete mess.
+    // maybe some people are using complex types for query parameter though??
     private List<ParameterObject> parameters = new ArrayList<>();
 
     private Map<String, ResponseObject> responses = new HashMap<>();
 
-    // security to add later on
-    // may also be managed at a higher level?
+    //private SecurityObject security = null;
+    private Map<String, List<String>> security = new HashMap<>();
+    //actually my security should be a map<String, array of string>
+    // the key is the name of a security scheme.
+    // which means that I must define a security scheme somewhere, at least
+    // on one of the endpoints to reuse it. The other endpoints can just reuse it by
+    // name.
+    // @SecurityDef name scheme ...
+    // @SecurityRef blabla
+
+    // by default JSR380 annotation will not trigger a validator
+    // unless @Valid is added. Which is good, I wan to use them
+    // only to generate better schemas, not to fail the parsing
+    // should see though is the library is using them to generate
+    // better schemas
+
+
     private RequestBody requestBody = null;
 
     public String getSummary() {
@@ -99,4 +115,11 @@ public class OperationObject {
         this.responses = responses;
     }
 
+    public Map<String, List<String>> getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(Map<String, List<String>> security) {
+        this.security = security;
+    }
 }

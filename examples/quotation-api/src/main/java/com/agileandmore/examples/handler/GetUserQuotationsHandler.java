@@ -18,6 +18,7 @@ import java.util.Map;
  * }}
  * @ServerlessOutput 400 com.agileandmore.examples.model.views.ErrorMessage An error message if the user id is invalid.
  * @ServerlessInputHeader authorization A JWT token to protect access to the API.
+ * @SecurityRef jwt_scheme1
  */
 public class GetUserQuotationsHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 

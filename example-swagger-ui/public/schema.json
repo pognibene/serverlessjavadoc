@@ -12,17 +12,13 @@
           "in" : "path",
           "description" : "the user ID (currently the international phone number). This parameter is mandatory.",
           "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
+          "schema" : { }
         }, {
           "name" : "authorization",
           "in" : "header",
           "description" : "A JWT token to protect access to the API.",
           "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
+          "schema" : { }
         } ],
         "responses" : {
           "200" : {
@@ -31,16 +27,12 @@
               "foo" : {
                 "description" : "another output header",
                 "required" : true,
-                "schema" : {
-                  "type" : "string"
-                }
+                "schema" : { }
               },
               "x-next" : {
                 "description" : "The url to get the next page of results",
                 "required" : true,
-                "schema" : {
-                  "type" : "string"
-                }
+                "schema" : { }
               }
             },
             "content" : {
@@ -62,7 +54,8 @@
               }
             }
           }
-        }
+        },
+        "security" : { }
       },
       "post" : {
         "summary" : "createUserQuotationHandler",
@@ -73,9 +66,7 @@
           "in" : "path",
           "description" : "the user ID (currently the international phone\nnumber). This parameter is mandatory.",
           "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
+          "schema" : { }
         } ],
         "responses" : {
           "201" : {
@@ -101,6 +92,7 @@
             }
           }
         },
+        "security" : { },
         "requestBody" : {
           "description" : "The Quotation object\nto create",
           "required" : true,
@@ -131,6 +123,7 @@
             "headers" : { }
           }
         },
+        "security" : { },
         "requestBody" : {
           "description" : "A dummy message.",
           "required" : true,
@@ -168,6 +161,7 @@
             "headers" : { }
           }
         },
+        "security" : { },
         "requestBody" : {
           "description" : "The User to create.",
           "required" : true,
@@ -192,9 +186,7 @@
           "in" : "path",
           "description" : "the full international phone/mobile number of the user.",
           "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
+          "schema" : { }
         } ],
         "responses" : {
           "200" : {
@@ -230,7 +222,8 @@
               }
             }
           }
-        }
+        },
+        "security" : { }
       },
       "put" : {
         "summary" : "updateUserByPhone",
@@ -253,7 +246,8 @@
               }
             }
           }
-        }
+        },
+        "security" : { }
       },
       "delete" : {
         "summary" : "deleteUser",
@@ -264,9 +258,7 @@
           "in" : "path",
           "description" : "the full international phone/mobile number of the user.",
           "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
+          "schema" : { }
         } ],
         "responses" : {
           "204" : {
@@ -284,7 +276,8 @@
               }
             }
           }
-        }
+        },
+        "security" : { }
       },
       "servers" : [ ]
     }
@@ -314,7 +307,9 @@
         "properties" : {
           "firstName" : {
             "type" : "string",
-            "description" : "User first name"
+            "description" : "User first name",
+            "minLength" : 3,
+            "maxLength" : 50
           },
           "lastName" : {
             "type" : "string",
@@ -322,7 +317,8 @@
           },
           "login" : {
             "type" : "string",
-            "description" : "The login for the User. This is the email address."
+            "description" : "The login for the User. This is the email address.",
+            "format" : "email"
           },
           "password" : {
             "type" : "string",

@@ -13,6 +13,10 @@ import java.util.Map;
  * @ServerlessInput java.lang.String A dummy message.
  * @ServerlessOutput 201 void if the Gradle has been created.
  * @ServerlessOutput 409 void An error if the Gradle already exists.
+ * @SecurityDef type=jwt name=jwt_scheme2 documentation=A JWT token to allow access to the endpoint. This token contains
+ * the user id (an UUID v4 string) and a list of roles as a comma separated list of strings. The token also has an expiration
+ * date.
+ * @SecurityRef jwt_scheme2
  */
 public class CreateGradleHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 

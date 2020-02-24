@@ -19,8 +19,7 @@
 package com.agileandmore.serverlessapijavadoc.openapi;
 
 public class StringSchema {
-
-    private String type = "string";
+    private String type;
 
     public String getType() {
         return type;
@@ -29,5 +28,4 @@ public class StringSchema {
     public void setType(String type) {
         this.type = type;
     }
-
 }

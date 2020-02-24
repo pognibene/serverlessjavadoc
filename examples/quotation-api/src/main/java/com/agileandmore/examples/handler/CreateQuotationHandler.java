@@ -17,6 +17,10 @@ import java.util.Map;
  * updated with the creation timestamp.
  * @ServerlessOutput 400 com.agileandmore.examples.model.views.ErrorMessage An
  * error message if the Quotation attributes are invalid.
+ * @SecurityDef type=jwt name=jwt_scheme1 documentation=A JWT token to allow access to the endpoint. This token contains
+ * the user id (an UUID v4 string) and a list of roles as a comma separated list of strings. The token also has an expiration
+ * date.
+ * @SecurityRef jwt_scheme1
  */
 public class CreateQuotationHandler implements RequestHandler<Map<String, Object>, ApiGatewayResponse> {
 

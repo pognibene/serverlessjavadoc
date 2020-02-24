@@ -15,14 +15,12 @@ paths:
         description: "the user ID (currently the international phone number). This\
           \ parameter is mandatory."
         required: true
-        schema:
-          type: "string"
+        schema: {}
       - name: "authorization"
         in: "header"
         description: "A JWT token to protect access to the API."
         required: true
-        schema:
-          type: "string"
+        schema: {}
       responses:
         "200":
           description: "The array of Quotations for this User."
@@ -30,13 +28,11 @@ paths:
             foo:
               description: "another output header"
               required: true
-              schema:
-                type: "string"
+              schema: {}
             x-next:
               description: "The url to get the next page of results"
               required: true
-              schema:
-                type: "string"
+              schema: {}
           content:
             application/json:
               schema:
@@ -48,6 +44,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.views.ErrorMessage"
+      security: {}
     post:
       summary: "createUserQuotationHandler"
       description: "Create a new Quotation object in the system, for a specific User."
@@ -59,8 +56,7 @@ paths:
         description: "the user ID (currently the international phone\nnumber). This\
           \ parameter is mandatory."
         required: true
-        schema:
-          type: "string"
+        schema: {}
       responses:
         "201":
           description: "The Payment,\nupdated with the creation timestamp."
@@ -76,6 +72,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.views.ErrorMessage"
+      security: {}
       requestBody:
         description: "The Quotation object\nto create"
         required: true
@@ -99,6 +96,7 @@ paths:
         "409":
           description: "An error if the Gradle already exists."
           headers: {}
+      security: {}
       requestBody:
         description: "A dummy message."
         required: true
@@ -125,6 +123,7 @@ paths:
         "409":
           description: "An error if the User already exists."
           headers: {}
+      security: {}
       requestBody:
         description: "The User to create."
         required: true
@@ -144,8 +143,7 @@ paths:
         in: "path"
         description: "the full international phone/mobile number of the user."
         required: true
-        schema:
-          type: "string"
+        schema: {}
       responses:
         "200":
           description: "The User."
@@ -169,6 +167,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.views.ErrorMessage"
+      security: {}
     put:
       summary: "updateUserByPhone"
       description: "Update an existing User."
@@ -186,6 +185,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.views.ErrorMessage"
+      security: {}
     delete:
       summary: "deleteUser"
       description: "Delete an existing User in the system."
@@ -196,8 +196,7 @@ paths:
         in: "path"
         description: "the full international phone/mobile number of the user."
         required: true
-        schema:
-          type: "string"
+        schema: {}
       responses:
         "204":
           description: "If the User has been deleted successfully."
@@ -209,6 +208,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/com.agileandmore.examples.model.views.ErrorMessage"
+      security: {}
     servers: []
 components:
   schemas:
@@ -231,12 +231,15 @@ components:
         firstName:
           type: "string"
           description: "User first name"
+          minLength: 3
+          maxLength: 50
         lastName:
           type: "string"
           description: "User last name"
         login:
           type: "string"
           description: "The login for the User. This is the email address."
+          format: "email"
         password:
           type: "string"
           description: "User password."

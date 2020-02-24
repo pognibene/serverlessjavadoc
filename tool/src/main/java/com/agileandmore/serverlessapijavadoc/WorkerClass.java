@@ -47,6 +47,7 @@ import com.github.victools.jsonschema.generator.SchemaGenerator;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfig;
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder;
 import com.github.victools.jsonschema.module.jackson.JacksonModule;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -69,8 +70,12 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import com.github.victools.jsonschema.module.javax.validation.JavaxValidationModule;
+import com.github.victools.jsonschema.module.javax.validation.JavaxValidationOption;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
 
@@ -83,6 +88,7 @@ public class WorkerClass {
     public void start(String inputFolder, String outputFolder) {
         URLClassLoader cl2 = null;
         JacksonModule jacksonModule = null;
+        JavaxValidationModule validationModule = null;
         try {
             List<Path> list = Files.walk(Paths.get(inputFolder))
                     .filter(Files::isRegularFile)
@@ -128,8 +134,6 @@ public class WorkerClass {
                 allUrls.add(oneUrl);
             }
 
-            // TODO should also inspect gradle file for the class path
-            // I doubt it's doable for ant though
             //we may have an option to provide the classpath manually for exotic tools
             // using the list of pom files, invokve maven and add more dependencies to
             // the classpath. We need them to load classes and generate json schemas.
@@ -213,8 +217,13 @@ public class WorkerClass {
             URL[] taburl = allUrls.stream().toArray(URL[]::new);
 
             // to recognize Jackson specific annotations
-            cl2 = new URLClassLoader(taburl, WorkerClass.class.getClassLoader());
             jacksonModule = new JacksonModule();
+
+            // to recognize validation annotations
+            validationModule = new JavaxValidationModule(JavaxValidationOption.INCLUDE_PATTERN_EXPRESSIONS,
+                    JavaxValidationOption.NOT_NULLABLE_FIELD_IS_REQUIRED);
+
+            cl2 = new URLClassLoader(taburl, WorkerClass.class.getClassLoader());
 
             for (Path path : javaFileList) {
                 CompilationUnit cu = StaticJavaParser.parse(path);
@@ -293,7 +302,7 @@ public class WorkerClass {
 
                         operationObject.setRequestBody(requestBody);
 
-                        createSchema(inputMessage.getQualifiedClassName(), schemasMap, inputMessage.getIsArray(), cl2, jacksonModule);
+                        createSchema(inputMessage.getQualifiedClassName(), schemasMap, inputMessage.getIsArray(), cl2, jacksonModule, validationModule);
                     }
 
                     // responses
@@ -312,7 +321,7 @@ public class WorkerClass {
                             populateMessageSchema(outputMessage.getIsArray(), outputMessage.getQualifiedClassName(), mediaTypeObject);
                             responseObject.getContent().put("application/json", mediaTypeObject);
 
-                            createSchema(outputMessage.getQualifiedClassName(), schemasMap, outputMessage.getIsArray(), cl2, jacksonModule);
+                            createSchema(outputMessage.getQualifiedClassName(), schemasMap, outputMessage.getIsArray(), cl2, jacksonModule, validationModule);
                         } else {
                             responseObject.setContent(null);
                         }
@@ -518,7 +527,8 @@ public class WorkerClass {
         return api;
     }
 
-    private void createSchema(String qualifiedClassName, Map schemasMap, boolean isArray, URLClassLoader cl2, JacksonModule jacksonModule) {
+    private void createSchema(String qualifiedClassName, Map schemasMap, boolean isArray, URLClassLoader cl2,
+                              JacksonModule jacksonModule, JavaxValidationModule validationModule) {
         try {
             Class loadedClass = cl2.loadClass(qualifiedClassName);
             Object obj = loadedClass.newInstance();
@@ -527,7 +537,8 @@ public class WorkerClass {
             SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(objectMapper,
                     OptionPreset.PLAIN_JSON)
                     .without(Option.SCHEMA_VERSION_INDICATOR)
-                    .with(jacksonModule);
+                    .with(jacksonModule)
+                    .with(validationModule);
             SchemaGeneratorConfig config = configBuilder.build();
             SchemaGenerator generator = new SchemaGenerator(config);
 
@@ -651,7 +662,7 @@ public class WorkerClass {
     }
 
     private void populateOutputHeaders(ResponseObject responseObject,
-            OutputMessage outputMessage) {
+                                       OutputMessage outputMessage) {
         for (PathOrQueryParam p : outputMessage.getParams()) {
             HeaderObject headerObject = new HeaderObject();
             headerObject.setDescription(p.getDocumentation());
