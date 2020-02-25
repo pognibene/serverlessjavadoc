@@ -8,7 +8,7 @@
 # you will need nodejs, npm and the yarn tool to be installed to generate
 # the reactjs documentation page.
 
-mvn clean compile
+mvn clean install
 cd gradle-api
 gradle clean build
 cd ../..
